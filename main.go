@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -119,25 +120,9 @@ func cloneRepo(client api.RESTClient, owner, repo, targetPath string) error {
 }
 
 func gitClone(cloneURL, targetPath string) error {
-	// We'll use git directly since go-gh doesn't have a clone function
-	// This is still better than shelling out to gh CLI
-	cmd := fmt.Sprintf("git clone %s %s", cloneURL, targetPath)
-	
-	// Use os/exec to run git clone
-	return runCommand("git", "clone", cloneURL, targetPath)
-}
-
-func runCommand(name string, args ...string) error {
-	// Simple command execution - in a real implementation you'd use os/exec
-	// For now, we'll keep it simple and use the system command
-	cmd := name
-	for _, arg := range args {
-		cmd += " " + arg
-	}
-	
-	// This is a simplified version - in practice use exec.Command
-	if err := os.system(cmd); err != nil {
-		return fmt.Errorf("command failed: %s", cmd)
+	cmd := exec.Command("git", "clone", cloneURL, targetPath)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git clone failed: %w", err)
 	}
 	return nil
 }
