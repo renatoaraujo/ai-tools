@@ -1,0 +1,4 @@
+tools:
+  - name: github-mcp-server
+    repo: https://github.com/github/github-mcp-server
+    description: Official GitHub MCP server
