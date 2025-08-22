@@ -8,6 +8,9 @@
 *.out
 go.work
 
+# Binary
+ai-tools
+
 # MCP servers - don't commit downloaded tools
 mcp/*/
 !mcp/.gitkeep

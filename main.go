@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cli/go-gh/v2/pkg/api"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,7 +23,76 @@ type Tool struct {
 	Description string `yaml:"description"`
 }
 
+var (
+	configFile string
+	outputDir  string
+	verbose    bool
+	version    = "dev" // Will be set during build
+)
+
 func main() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+var rootCmd = &cobra.Command{
+	Use:   "ai-tools",
+	Short: "A collection of AI tools and utilities",
+	Long:  `ai-tools is a CLI application for managing AI tools and utilities, including cloning MCP (Model Context Protocol) servers from GitHub.`,
+	Example: `  # Clone MCP tools using default configuration
+  ai-tools clone
+
+  # Clone with custom configuration file
+  ai-tools clone --config my-tools.yaml
+
+  # Clone to a custom directory with verbose output
+  ai-tools clone --output my-mcp-tools --verbose`,
+	// Run clone command by default if no subcommand is specified
+	Run: func(cmd *cobra.Command, args []string) {
+		// If no subcommand provided, run clone with default flags
+		runClone(cmd, args)
+	},
+}
+
+var cloneCmd = &cobra.Command{
+	Use:   "clone",
+	Short: "Clone MCP tools from GitHub repositories",
+	Long:  `Clone MCP (Model Context Protocol) tools from GitHub repositories specified in a configuration file.`,
+	Example: `  # Clone using default configuration
+  ai-tools clone
+
+  # Clone with custom config and output directory
+  ai-tools clone --config my-config.yaml --output ./tools`,
+	Run: runClone,
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print the version number of ai-tools",
+	Long:  `Print the version number of ai-tools`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("ai-tools %s\n", version)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(cloneCmd)
+	rootCmd.AddCommand(versionCmd)
+
+	// Add flags to root command for backward compatibility
+	rootCmd.Flags().StringVarP(&configFile, "config", "c", "mcp-tools.yaml", "Configuration file containing tools to clone")
+	rootCmd.Flags().StringVarP(&outputDir, "output", "o", "mcp", "Output directory for cloned repositories")
+	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+
+	// Also add flags to clone command 
+	cloneCmd.Flags().StringVarP(&configFile, "config", "c", "mcp-tools.yaml", "Configuration file containing tools to clone")
+	cloneCmd.Flags().StringVarP(&outputDir, "output", "o", "mcp", "Output directory for cloned repositories")
+	cloneCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+}
+
+func runClone(cmd *cobra.Command, args []string) {
 	client, err := api.DefaultRESTClient()
 	if err != nil {
 		log.Fatalf("Failed to create GitHub client (is gh CLI authenticated?): %v", err)
@@ -36,11 +106,13 @@ func main() {
 		log.Fatalf("Failed to authenticate with GitHub (run 'gh auth login'): %v", err)
 	}
 
-	fmt.Printf("Authenticated as: %s\n", user.Login)
+	if verbose {
+		fmt.Printf("Authenticated as: %s\n", user.Login)
+	}
 
-	data, err := os.ReadFile("mcp-tools.yaml")
+	data, err := os.ReadFile(configFile)
 	if err != nil {
-		log.Fatalf("Failed to read mcp-tools.yaml: %v", err)
+		log.Fatalf("Failed to read %s: %v", configFile, err)
 	}
 
 	var config Config
@@ -48,9 +120,8 @@ func main() {
 		log.Fatalf("Failed to parse YAML: %v", err)
 	}
 
-	mcpDir := "mcp"
-	if err = os.MkdirAll(mcpDir, 0755); err != nil {
-		log.Fatalf("Failed to create mcp directory: %v", err)
+	if err = os.MkdirAll(outputDir, 0755); err != nil {
+		log.Fatalf("Failed to create %s directory: %v", outputDir, err)
 	}
 
 	fmt.Printf("Cloning %d MCP tools...\n", len(config.Tools))
@@ -64,7 +135,7 @@ func main() {
 			continue
 		}
 
-		targetPath := filepath.Join(mcpDir, repo)
+		targetPath := filepath.Join(outputDir, repo)
 
 		if _, err = os.Stat(targetPath); err == nil {
 			fmt.Printf("  %s already exists, skipping\n", repo)
