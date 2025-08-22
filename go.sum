@@ -1,0 +1,14 @@
+github.com/cli/go-gh/v2 v2.11.0 h1:mv7YuTOjvn87YCPwHeNWOoWIhN5PvDeL6DEkmcgf6MQ=
+github.com/cli/go-gh/v2 v2.11.0/go.mod h1:+V6jk5ZrXz6qHjrVGqX1XXcXm3UKE/5HdSJtJbGO3W0=
+github.com/cli/safeexec v1.0.1 h1:e8DLeg8UpOFIqAgT4fVXoJMYIzOwQPXp/cBQPJWV5Jw=
+github.com/cli/safeexec v1.0.1/go.mod h1:Z/D4tTN8Vs5gXYHDCbaM1S/anmEDnJb1iW0+EJ5zx3Q=
+github.com/cli/shurcooL-graphql v0.0.4 h1:Tz9fAo5FiKEr+tCY9r4TdWP4BfXSwHNZbSjpVzWOCT0=
+github.com/cli/shurcooL-graphql v0.0.4/go.mod h1:LY1L6tbCcKd9XCe4mLzfKE0KBQZBpBGu93S2CmxPD6g=
+github.com/henvic/httpretty v0.1.4 h1:i7UDlBeFoJhbIo8s5WflqzfLF9EKG9WhI0DGKGQM5UA=
+github.com/henvic/httpretty v0.1.4/go.mod h1:P4+gvRjKhP4AQQwVKSrCkR4Gt6EICBH8FNVHgOPv0xM=
+github.com/thlib/go-timezone-local v0.0.4 h1:GbAJBlAmjIoE3HNAo9e6XJMfhJCcNYCDUBEt9a5KoWY=
+github.com/thlib/go-timezone-local v0.0.4/go.mod h1:GQSASaI2C3+OZWHJxkAr9R5J8kLTPM6TIYlxkp2Gz4o=
+gopkg.in/h2non/gock.v1 v1.1.2 h1:jBbHXgGBK/AoPVfJh5x4r/WxIrElvbLel8TCZkkZJoY=
+gopkg.in/h2non/gock.v1 v1.1.2/go.mod h1:n7UGz/ckNChHiK05rDoiC4MYSunEC/lyaUm2WWaDva0=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
