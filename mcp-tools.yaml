@@ -2,3 +2,6 @@ tools:
   - name: github-mcp-server
     repo: https://github.com/github/github-mcp-server
     description: Official GitHub MCP server
+  - name: grafana-mcp-server
+    repo: https://github.com/grafana/mcp-grafana
+    description: Official Grafana MCP server

@@ -23,35 +23,33 @@ type Tool struct {
 }
 
 func main() {
-	// Check if gh is authenticated
 	client, err := api.DefaultRESTClient()
 	if err != nil {
 		log.Fatalf("Failed to create GitHub client (is gh CLI authenticated?): %v", err)
 	}
 
-	// Test authentication by getting user info
 	var user struct {
 		Login string `json:"login"`
 	}
-	if err := client.Get("user", &user); err != nil {
+
+	if err = client.Get("user", &user); err != nil {
 		log.Fatalf("Failed to authenticate with GitHub (run 'gh auth login'): %v", err)
 	}
+
 	fmt.Printf("Authenticated as: %s\n", user.Login)
 
-	// Read config file
 	data, err := os.ReadFile("mcp-tools.yaml")
 	if err != nil {
 		log.Fatalf("Failed to read mcp-tools.yaml: %v", err)
 	}
 
 	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
+	if err = yaml.Unmarshal(data, &config); err != nil {
 		log.Fatalf("Failed to parse YAML: %v", err)
 	}
 
-	// Create mcp directory if it doesn't exist
 	mcpDir := "mcp"
-	if err := os.MkdirAll(mcpDir, 0755); err != nil {
+	if err = os.MkdirAll(mcpDir, 0755); err != nil {
 		log.Fatalf("Failed to create mcp directory: %v", err)
 	}
 
@@ -59,8 +57,7 @@ func main() {
 
 	for _, tool := range config.Tools {
 		fmt.Printf("Cloning %s...\n", tool.Name)
-		
-		// Parse repository URL to get owner and repo
+
 		owner, repo, err := parseRepoURL(tool.Repo)
 		if err != nil {
 			fmt.Printf("  Failed to parse repo URL %s: %v\n", tool.Repo, err)
@@ -69,14 +66,12 @@ func main() {
 
 		targetPath := filepath.Join(mcpDir, repo)
 
-		// Skip if already exists
-		if _, err := os.Stat(targetPath); err == nil {
+		if _, err = os.Stat(targetPath); err == nil {
 			fmt.Printf("  %s already exists, skipping\n", repo)
 			continue
 		}
 
-		// Clone repository using go-gh
-		if err := cloneRepo(client, owner, repo, targetPath); err != nil {
+		if err = cloneRepo(client, owner, repo, targetPath); err != nil {
 			fmt.Printf("  Failed to clone %s: %v\n", tool.Name, err)
 			continue
 		}
@@ -88,34 +83,30 @@ func main() {
 }
 
 func parseRepoURL(repoURL string) (owner, repo string, err error) {
-	// Remove .git suffix if present
 	repoURL = strings.TrimSuffix(repoURL, ".git")
-	
-	// Handle both https://github.com/owner/repo and owner/repo formats
+
 	if strings.HasPrefix(repoURL, "https://github.com/") {
 		repoURL = strings.TrimPrefix(repoURL, "https://github.com/")
 	}
-	
+
 	parts := strings.Split(repoURL, "/")
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf("invalid repository URL format, expected owner/repo")
 	}
-	
+
 	return parts[0], parts[1], nil
 }
 
-func cloneRepo(client api.RESTClient, owner, repo, targetPath string) error {
-	// Get repository information to get the clone URL
+func cloneRepo(client *api.RESTClient, owner, repo, targetPath string) error {
 	var repoInfo struct {
 		CloneURL string `json:"clone_url"`
 	}
-	
+
 	endpoint := fmt.Sprintf("repos/%s/%s", owner, repo)
 	if err := client.Get(endpoint, &repoInfo); err != nil {
 		return fmt.Errorf("failed to get repository info: %w", err)
 	}
 
-	// Use git to clone the repository
 	return gitClone(repoInfo.CloneURL, targetPath)
 }
 
